@@ -80,32 +80,6 @@ const StatusItemScroller = (props: StatusItemScrollerProps) => {
   };
 
 
-  const navigateToUser = async (event: React.MouseEvent): Promise<void> => {
-    event.preventDefault();
-
-    try {
-      const alias = extractAlias(event.target.toString());
-
-      const toUser = await getUser(authToken!, alias);
-
-      if (toUser) {
-        if (!toUser.equals(displayedUser!)) {
-          setDisplayedUser(toUser);
-          navigate(`${props.featurePath}/${toUser.alias}`);
-        }
-      }
-    } catch (error) {
-      displayErrorMessage(
-        `Failed to get user because of exception: ${error}`
-      );
-    }
-  };
-
-  const extractAlias = (value: string): string => {
-    const index = value.indexOf("@");
-    return value.substring(index);
-  };
-
   const getUser = async (
     authToken: AuthToken,
     alias: string
