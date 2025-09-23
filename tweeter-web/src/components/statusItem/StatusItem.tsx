@@ -28,7 +28,7 @@ const StatusItem = (props: StatusItemProps) => {
       if (toUser) {
         if (!toUser.equals(displayedUser!)) {
           setDisplayedUser(toUser);
-          navigate(`/feed/${toUser.alias}`);
+          navigate(`${props.featurePath}/${toUser.alias}`);
         }
       }
     } catch (error) {
@@ -80,7 +80,7 @@ const StatusItem = (props: StatusItemProps) => {
                     </h2>
                     {props.status.formattedDate}
                     <br />
-                    <Post status={props.status} featurePath="/feed" />
+                    <Post status={props.status} featurePath={props.featurePath} />
                   </div>
                 </div>
               </div>
