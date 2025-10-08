@@ -1,6 +1,7 @@
 import { AuthToken } from "tweeter-shared";
 import { UserService } from "../model.service/UserService";
 
+
 export class UserNavigationPresenter {
 
     private userService : UserService;

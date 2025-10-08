@@ -1,12 +1,13 @@
 import "./Login.css";
 import "bootstrap/dist/css/bootstrap.css";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthenticationFormLayout from "../AuthenticationFormLayout";
 import { AuthToken, FakeData, User } from "tweeter-shared";
 import AuthenticationFields from "../AuthenticationFields";
 import { useMessageActions } from "../../toaster/MessageHooks";
 import { useUserInfoActions } from "../../userInfo/UserInfoHooks";
+import { LoginPresenter } from "../../../presenters/LoginPresenter";
 
 interface Props {
   originalUrl?: string;
@@ -21,6 +22,19 @@ const Login = (props: Props) => {
   const navigate = useNavigate();
   const { updateUserInfo } = useUserInfoActions();
   const { displayErrorMessage } = useMessageActions();
+
+  const presenter = useRef<LoginPresenter | null>(null)
+  if (!presenter.current) {
+    presenter.current = new LoginPresenter({
+      setIsLoading,
+      navigate,
+      updateUserInfo,
+      displayErrorMessage,
+      setAlias,
+      setPassword,
+      setRememberMe
+    });
+}
 
   const checkSubmitButtonStatus = (): boolean => {
     return !alias || !password;
@@ -70,7 +84,7 @@ const Login = (props: Props) => {
 
   const inputFieldFactory = () => {
     return (
-      <AuthenticationFields keyDownEvent={loginOnEnter} setAlias={setAlias} setPassword={setPassword}/>
+      <AuthenticationFields keyDownEvent={(e) => presenter.current!.loginOnEnter(e)} setAlias={(value) => presenter.current!.alias = value} setPassword={(value) => presenter.current!.password = value}/>
     );
   };
 
@@ -89,10 +103,10 @@ const Login = (props: Props) => {
       oAuthHeading="Sign in with:"
       inputFieldFactory={inputFieldFactory}
       switchAuthenticationMethodFactory={switchAuthenticationMethodFactory}
-      setRememberMe={setRememberMe}
-      submitButtonDisabled={checkSubmitButtonStatus}
+      setRememberMe={(value) => presenter.current!.rememberMe = value}
+      submitButtonDisabled={() => presenter.current!.checkSubmitButtonStatus()}
       isLoading={isLoading}
-      submit={doLogin}
+      submit={() => presenter.current!.doLogin()}
     />
   );
 };
