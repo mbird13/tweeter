@@ -10,7 +10,7 @@ interface StatusItemProps {
 
 const StatusItem = (props: StatusItemProps) => {
     
-  const { navigateToUser } = useUserNavigation();
+  const navigateToUser = useUserNavigation();
   
     return (
         <div className="col bg-light mx-0 px-0">

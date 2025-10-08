@@ -14,8 +14,10 @@ import UserItemScroller from "./components/mainLayout/UserItemScroller";
 import { AuthToken, User, FakeData, Status } from "tweeter-shared";
 import StatusItemScroller from "./components/mainLayout/StatusItemScroller";
 import { useUserInfo } from "./components/userInfo/UserInfoHooks";
-import { FolloweePresenter } from "./presenter/FolloweePresenter";
-import { FollowerPresenter } from "./presenter/FollowerPresenter";
+import { FolloweePresenter } from "./presenters/FolloweePresenter";
+import { FollowerPresenter } from "./presenters/FollowerPresenter";
+import { FeedPresenter } from "./presenters/FeedPresenter";
+import { StoryPresenter } from "./presenters/StoryPresenter";
 
 const App = () => {
   const { currentUser, authToken } = useUserInfo();
@@ -41,32 +43,12 @@ const App = () => {
 const AuthenticatedRoutes = () => {
   const { displayedUser } = useUserInfo();
 
-
-    const loadMoreFeedItems = async (
-        authToken: AuthToken,
-        userAlias: string,
-        pageSize: number,
-        lastItem: Status | null
-      ): Promise<[Status[], boolean]> => {
-        // TODO: Replace with the result of calling server
-        return FakeData.instance.getPageOfStatuses(lastItem, pageSize);
-      };
-
-    const loadMoreStoryItems = async (
-        authToken: AuthToken,
-        userAlias: string,
-        pageSize: number,
-        lastItem: Status | null
-      ): Promise<[Status[], boolean]> => {
-        // TODO: Replace with the result of calling server
-        return FakeData.instance.getPageOfStatuses(lastItem, pageSize);
-      };
   return (
     <Routes>
       <Route element={<MainLayout />}>
         <Route index element={<Navigate to={`/feed/${displayedUser!.alias}`} />} />
-        <Route path="feed/:displayedUser" element={<StatusItemScroller key={`feed-${displayedUser!.alias}`} description="feed" featurePath="/feed" loadMoreFunction={loadMoreFeedItems} />} />
-        <Route path="story/:displayedUser" element={<StatusItemScroller key={`story-${displayedUser!.alias}`} description="story" featurePath="/story" loadMoreFunction={loadMoreStoryItems} />} />
+        <Route path="feed/:displayedUser" element={<StatusItemScroller key={`feed-${displayedUser!.alias}`} featurePath="/feed" presenterFactory={(listener) => new FeedPresenter(listener)} />} />
+        <Route path="story/:displayedUser" element={<StatusItemScroller key={`story-${displayedUser!.alias}`} featurePath="/story" presenterFactory={(listener) => new StoryPresenter(listener)} />} />
         <Route path="followees/:displayedUser" element={<UserItemScroller key={`followees-${displayedUser!.alias}`}  featureUrl="/followees" presenterFactory={(listener) => new FolloweePresenter(listener)} />} />
         <Route path="followers/:displayedUser" element={<UserItemScroller key={`followers-${displayedUser!.alias}`} featureUrl="/followers" presenterFactory={(listener) => new FollowerPresenter(listener)} />} />
         <Route path="logout" element={<Navigate to="/login" />} />

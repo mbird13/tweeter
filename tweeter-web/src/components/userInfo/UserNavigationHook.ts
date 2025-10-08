@@ -5,33 +5,30 @@ import { useMessageActions } from "../toaster/MessageHooks";
 
 
 export const useUserNavigation = () => {
-    return { navigateToUser };
-}
-
-const navigateToUser = async (event: React.MouseEvent, featurePath: string): Promise<void> => {
     const { setDisplayedUser } = useUserInfoActions();
     const { displayedUser, authToken } = useUserInfo();
     const { displayErrorMessage } = useMessageActions();
-
     const navigate = useNavigate();
+    return async (event: React.MouseEvent, featurePath: string): Promise<void> => {
 
-    event.preventDefault();
+        event.preventDefault();
 
-    try {
-    const alias = extractAlias(event.target.toString());
+        try {
+        const alias = extractAlias(event.target.toString());
 
-    const toUser = await getUser(authToken!, alias);
+        const toUser = await getUser(authToken!, alias);
 
-    if (toUser) {
-        if (!toUser.equals(displayedUser!)) {
-        setDisplayedUser(toUser);
-        navigate(`${featurePath}/${toUser.alias}`);
+        if (toUser) {
+            if (!toUser.equals(displayedUser!)) {
+            setDisplayedUser(toUser);
+            navigate(`${featurePath}/${toUser.alias}`);
+            }
         }
-    }
-    } catch (error) {
-    displayErrorMessage(
-        `Failed to get user because of exception: ${error}`
-    );
+        } catch (error) {
+        displayErrorMessage(
+            `Failed to get user because of exception: ${error}`
+        );
+        }
     }
 };
 

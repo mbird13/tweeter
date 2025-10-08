@@ -1,5 +1,6 @@
 import { AuthToken, User } from "tweeter-shared";
 import { UserService } from "../model.service/UserService";
+import { FollowService } from "../model.service/FollowService";
 
 export interface UserItemView {
     addItems: (items: User[]) => void;
@@ -9,6 +10,7 @@ export interface UserItemView {
 export abstract class UserItemPresenter {
     private _view: UserItemView;
     private userService: UserService;
+    protected service: FollowService;
 
     private _hasMoreItems : boolean = true;
     private _lastItem : User | null= null;
@@ -16,6 +18,7 @@ export abstract class UserItemPresenter {
     protected constructor(view: UserItemView) {
         this._view = view;
         this.userService = new UserService();
+        this.service = new FollowService();
     }
 
     protected get view(): UserItemView {
@@ -39,8 +42,8 @@ export abstract class UserItemPresenter {
     }
 
     reset() {
-            this._lastItem = null;
-            this._hasMoreItems = true;
+        this._lastItem = null;
+        this._hasMoreItems = true;
     }
 
     public async getUser (
