@@ -50,15 +50,15 @@ export class LoginPresenter {
     }
 
 
-    public checkSubmitButtonStatus(): boolean {
-        return !this._alias || !this._password;
-    };
+  public checkSubmitButtonStatus(): boolean {
+      return !this._alias || !this._password;
+  };
 
-    public loginOnEnter(event: React.KeyboardEvent<HTMLElement>) {
-        if (event.key == "Enter" && !this.checkSubmitButtonStatus()) {
-        this.doLogin();
-        }
-    };
+  public loginOnEnter(event: React.KeyboardEvent<HTMLElement>) {
+      if (event.key == "Enter" && !this.checkSubmitButtonStatus()) {
+      this.doLogin();
+      }
+  };
 
 public async doLogin(originalUrl?: string) {
     try {
