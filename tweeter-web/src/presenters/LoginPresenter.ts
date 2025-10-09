@@ -1,4 +1,5 @@
-import { User, AuthToken, FakeData } from "tweeter-shared";
+import { User, AuthToken } from "tweeter-shared";
+import { UserService } from "../model.service/UserService";
 
 export interface LoginView {
     setIsLoading: (isLoading: boolean) => void;
@@ -13,6 +14,7 @@ export interface LoginView {
 export class LoginPresenter {
 
     private view: LoginView;
+    private userService: UserService;
 
     private _alias: string;
   public get alias(): string {
@@ -41,6 +43,7 @@ export class LoginPresenter {
 
     public constructor(view: LoginView) {
         this.view = view;
+        this.userService = new UserService();
         this._rememberMe = false;
         this._alias = '';
         this._password = '';
@@ -61,7 +64,7 @@ public async doLogin(originalUrl?: string) {
     try {
       this.view.setIsLoading(true);
 
-      const [user, authToken] = await this.login(this.alias, this.password);
+      const [user, authToken] = await this.userService.login(this.alias, this.password);
 
       this.view.updateUserInfo(user, user, authToken, this._rememberMe);
 
@@ -77,19 +80,5 @@ public async doLogin(originalUrl?: string) {
     } finally {
       this.view.setIsLoading(false);
     }
-  };
-
-  public async login(
-    alias: string,
-    password: string
-  ): Promise<[User, AuthToken]> {
-    // TODO: Replace with the result of calling the server
-    const user = FakeData.instance.firstUser;
-
-    if (user === null) {
-      throw new Error("Invalid alias or password");
-    }
-
-    return [user, FakeData.instance.authToken];
   };
 }

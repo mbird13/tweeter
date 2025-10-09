@@ -36,51 +36,6 @@ const Login = (props: Props) => {
     });
 }
 
-  const checkSubmitButtonStatus = (): boolean => {
-    return !alias || !password;
-  };
-
-  const loginOnEnter = (event: React.KeyboardEvent<HTMLElement>) => {
-    if (event.key == "Enter" && !checkSubmitButtonStatus()) {
-      doLogin();
-    }
-  };
-
-  const doLogin = async () => {
-    try {
-      setIsLoading(true);
-
-      const [user, authToken] = await login(alias, password);
-
-      updateUserInfo(user, user, authToken, rememberMe);
-
-      if (!!props.originalUrl) {
-        navigate(props.originalUrl);
-      } else {
-        navigate(`/feed/${user.alias}`);
-      }
-    } catch (error) {
-      displayErrorMessage(
-        `Failed to log user in because of exception: ${error}`
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const login = async (
-    alias: string,
-    password: string
-  ): Promise<[User, AuthToken]> => {
-    // TODO: Replace with the result of calling the server
-    const user = FakeData.instance.firstUser;
-
-    if (user === null) {
-      throw new Error("Invalid alias or password");
-    }
-
-    return [user, FakeData.instance.authToken];
-  };
 
   const inputFieldFactory = () => {
     return (
@@ -106,7 +61,7 @@ const Login = (props: Props) => {
       setRememberMe={(value) => presenter.current!.rememberMe = value}
       submitButtonDisabled={() => presenter.current!.checkSubmitButtonStatus()}
       isLoading={isLoading}
-      submit={() => presenter.current!.doLogin()}
+      submit={() => presenter.current!.doLogin(props.originalUrl)}
     />
   );
 };
