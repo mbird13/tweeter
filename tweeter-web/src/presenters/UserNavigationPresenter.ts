@@ -11,7 +11,8 @@ export class UserNavigationPresenter {
     }
 
     public extractAlias (value: string): string {
-        return this.userService.extractAlias(value);
+        const index = value.indexOf("@");
+        return value.substring(index);
     }
 
     public async getUser (

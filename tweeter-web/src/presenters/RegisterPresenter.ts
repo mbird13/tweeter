@@ -2,12 +2,12 @@ import { Buffer } from "buffer";
 import { ChangeEvent } from "react";
 import { User, AuthToken } from "tweeter-shared";
 import { UserService } from "../model.service/UserService";
+import { View, Presenter } from "./Presenter";
 
-export interface RegisterView {
+export interface RegisterView extends View {
     setIsLoading: (isLoading: boolean) => void;
     navigate: (path: string) => void;
     updateUserInfo: (currentUser: User, displayedUser: User, authToken: AuthToken, rememberMe: boolean) => void;
-    displayErrorMessage: (message: string) => void;
     setAlias: (value: string) => void;
     setPassword: (value: string) => void;
     setRememberMe: (value: boolean) => void;
@@ -18,12 +18,11 @@ export interface RegisterView {
     setImageBytes: (value : Uint8Array) => void;
 }
 
-export class RegisterPresenter {
+export class RegisterPresenter extends Presenter<RegisterView>{
 
-    private view: RegisterView;
-    private userService: UserService;
+  private userService: UserService;
 
-    private _alias: string;
+  private _alias: string;
   public get alias(): string {
     return this._alias;
   }
@@ -91,7 +90,7 @@ export class RegisterPresenter {
     }
 
     public constructor(view: RegisterView) {
-        this.view = view;
+        super(view);
         this.userService = new UserService();
         this._rememberMe = false;
         this._alias = '';
@@ -165,7 +164,7 @@ export class RegisterPresenter {
     
 
 public async doRegister() {
-    try {
+    await this.doFailureReportingOperation(async () => {
       this.view.setIsLoading(true);
 
       const [user, authToken] = await this.userService.register(
@@ -179,13 +178,9 @@ public async doRegister() {
 
       this.view.updateUserInfo(user, user, authToken, this.rememberMe);
       this.view.navigate(`/feed/${user.alias}`);
-    } catch (error) {
-      this.view.displayErrorMessage(
-        `Failed to register user because of exception: ${error}`
-      );
-    } finally {
-      this.view.setIsLoading(false);
-    }
+    }, "register user");
+   
+    this.view.setIsLoading(false);
   };
 
   

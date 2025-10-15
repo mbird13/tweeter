@@ -9,12 +9,6 @@ export class UserService {
     // TODO: Replace with the result of calling server
     return FakeData.instance.findUserByAlias(alias);
   };
-
-
-  public extractAlias (value: string): string {
-    const index = value.indexOf("@");
-    return value.substring(index);
-  }; 
     
   public async register(
     firstName: string,

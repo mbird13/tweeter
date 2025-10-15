@@ -1,22 +1,21 @@
 import { User, AuthToken } from "tweeter-shared";
 import { UserService } from "../model.service/UserService";
+import { View, Presenter } from "./Presenter";
 
-export interface LoginView {
+export interface LoginView extends View{
     setIsLoading: (isLoading: boolean) => void;
     navigate: (path: string) => void;
     updateUserInfo: (currentUser: User, displayedUser: User, authToken: AuthToken, rememberMe: boolean) => void;
-    displayErrorMessage: (message: string) => void;
     setAlias: (value: string) => void;
     setPassword: (value: string) => void;
     setRememberMe: (value: boolean) => void;
 }
 
-export class LoginPresenter {
+export class LoginPresenter extends Presenter<LoginView>{
 
-    private view: LoginView;
-    private userService: UserService;
+  private userService: UserService;
 
-    private _alias: string;
+  private _alias: string;
   public get alias(): string {
     return this._alias;
   }
@@ -42,7 +41,7 @@ export class LoginPresenter {
   }
 
     public constructor(view: LoginView) {
-        this.view = view;
+        super(view);
         this.userService = new UserService();
         this._rememberMe = false;
         this._alias = '';
@@ -60,8 +59,8 @@ export class LoginPresenter {
       }
   };
 
-public async doLogin(originalUrl?: string) {
-    try {
+  public async doLogin(originalUrl?: string) {
+    await this.doFailureReportingOperation(async () => {
       this.view.setIsLoading(true);
 
       const [user, authToken] = await this.userService.login(this.alias, this.password);
@@ -73,12 +72,7 @@ public async doLogin(originalUrl?: string) {
       } else {
         this.view.navigate(`/feed/${user.alias}`);
       }
-    } catch (error) {
-      this.view.displayErrorMessage(
-        `Failed to log user in because of exception: ${error}`
-      );
-    } finally {
-      this.view.setIsLoading(false);
-    }
+    }, "log in user");
+    this.view.setIsLoading(false);
   };
 }
