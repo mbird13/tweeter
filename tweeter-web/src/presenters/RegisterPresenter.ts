@@ -3,14 +3,9 @@ import { ChangeEvent } from "react";
 import { User, AuthToken } from "tweeter-shared";
 import { UserService } from "../model.service/UserService";
 import { View, Presenter } from "./Presenter";
+import { AuthenticationPresenter, AuthenticationView } from "./AuthenticationPresenter";
 
-export interface RegisterView extends View {
-    setIsLoading: (isLoading: boolean) => void;
-    navigate: (path: string) => void;
-    updateUserInfo: (currentUser: User, displayedUser: User, authToken: AuthToken, rememberMe: boolean) => void;
-    setAlias: (value: string) => void;
-    setPassword: (value: string) => void;
-    setRememberMe: (value: boolean) => void;
+export interface RegisterView extends AuthenticationView {
     setImageUrl: (value: string) => void;
     setFirstName: (value: string) => void;
     setLastName: (value: string) => void;
@@ -18,34 +13,7 @@ export interface RegisterView extends View {
     setImageBytes: (value : Uint8Array) => void;
 }
 
-export class RegisterPresenter extends Presenter<RegisterView>{
-
-  private userService: UserService;
-
-  private _alias: string;
-  public get alias(): string {
-    return this._alias;
-  }
-  public set alias(value: string) {
-    this.view.setAlias(value);
-    this._alias = value;
-  }
-    private _password: string;
-  public get password(): string {
-    return this._password;
-  }
-  public set password(value: string) {
-    this.view.setPassword(value);
-    this._password = value;
-  }
-    private _rememberMe: boolean;
-  public get rememberMe(): boolean {
-    return this._rememberMe;
-  }
-  public set rememberMe(value: boolean) {
-    this.view.setRememberMe(value);
-    this._rememberMe = value;
-  }
+export class RegisterPresenter extends AuthenticationPresenter<RegisterView> {
 
   private _imageUrl: string;
     public get imageUrl(): string {
@@ -164,24 +132,16 @@ export class RegisterPresenter extends Presenter<RegisterView>{
     
 
 public async doRegister() {
-    await this.doFailureReportingOperation(async () => {
-      this.view.setIsLoading(true);
-
-      const [user, authToken] = await this.userService.register(
+      await this.doAuthenticationOperation(async () => this.userService.register(
         this.firstName,
         this.lastName,
         this.alias,
         this.password,
         this.imageBytes,
         this.imageFileExtension
-      );
+      ), 
+      () => this.view.navigate(`/feed/${this.alias}`),
+    "register user")
+    }
 
-      this.view.updateUserInfo(user, user, authToken, this.rememberMe);
-      this.view.navigate(`/feed/${user.alias}`);
-    }, "register user");
-   
-    this.view.setIsLoading(false);
-  };
-
-  
 }

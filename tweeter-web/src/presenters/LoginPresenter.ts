@@ -1,53 +1,11 @@
-import { User, AuthToken } from "tweeter-shared";
 import { UserService } from "../model.service/UserService";
-import { View, Presenter } from "./Presenter";
+import { Presenter } from "./Presenter";
+import { AuthenticationPresenter, AuthenticationView } from "./AuthenticationPresenter";
 
-export interface LoginView extends View{
-    setIsLoading: (isLoading: boolean) => void;
-    navigate: (path: string) => void;
-    updateUserInfo: (currentUser: User, displayedUser: User, authToken: AuthToken, rememberMe: boolean) => void;
-    setAlias: (value: string) => void;
-    setPassword: (value: string) => void;
-    setRememberMe: (value: boolean) => void;
+export interface LoginView extends AuthenticationView{
 }
 
-export class LoginPresenter extends Presenter<LoginView>{
-
-  private userService: UserService;
-
-  private _alias: string;
-  public get alias(): string {
-    return this._alias;
-  }
-  public set alias(value: string) {
-    this.view.setAlias(value);
-    this._alias = value;
-  }
-    private _password: string;
-  public get password(): string {
-    return this._password;
-  }
-  public set password(value: string) {
-    this.view.setPassword(value);
-    this._password = value;
-  }
-    private _rememberMe: boolean;
-  public get rememberMe(): boolean {
-    return this._rememberMe;
-  }
-  public set rememberMe(value: boolean) {
-    this.view.setRememberMe(value);
-    this._rememberMe = value;
-  }
-
-    public constructor(view: LoginView) {
-        super(view);
-        this.userService = new UserService();
-        this._rememberMe = false;
-        this._alias = '';
-        this._password = '';
-    }
-
+export class LoginPresenter extends AuthenticationPresenter<LoginView>{
 
   public checkSubmitButtonStatus(): boolean {
       return !this._alias || !this._password;
@@ -60,19 +18,17 @@ export class LoginPresenter extends Presenter<LoginView>{
   };
 
   public async doLogin(originalUrl?: string) {
-    await this.doFailureReportingOperation(async () => {
-      this.view.setIsLoading(true);
-
-      const [user, authToken] = await this.userService.login(this.alias, this.password);
-
-      this.view.updateUserInfo(user, user, authToken, this._rememberMe);
-
-      if (!!originalUrl) {
-        this.view.navigate(originalUrl);
-      } else {
-        this.view.navigate(`/feed/${user.alias}`);
-      }
-    }, "log in user");
-    this.view.setIsLoading(false);
-  };
+    await this.doAuthenticationOperation(async () => this.userService.login(
+        this.alias,
+        this.password,
+      ), 
+      () => {
+        if (!!originalUrl) {
+          this.view.navigate(originalUrl);
+        } else {
+          this.view.navigate(`/feed/${this.alias}`);
+        }
+      },
+    "log in user")
+    }
 }

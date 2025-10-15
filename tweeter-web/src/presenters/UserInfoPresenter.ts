@@ -3,9 +3,6 @@ import { FollowService } from "../model.service/FollowService";
 import { MessageView, Presenter } from "./Presenter";
 
 export interface UserItemView extends MessageView {
-    displayErrorMessage: (message: string) => void;
-    displayInfoMessage: (message: string, duration: number) => string;
-    deleteMessage: (id: string) => void;
     setIsFollower: (isFollower: boolean) => void;
     setFolloweeCount: (count: number) => void;
     setFollowerCount: (count: number) => void;
