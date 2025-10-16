@@ -51,7 +51,7 @@ export abstract class AuthenticationPresenter<V extends AuthenticationView> exte
         await this.doFailureReportingOperation(async () => {
             this.view.setIsLoading(true);
 
-            const [user, authToken] = await operation();// this.userService.login(this.alias, this.password);
+            const [user, authToken] = await operation();
 
             this.view.updateUserInfo(user, user, authToken, this._rememberMe);
 
