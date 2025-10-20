@@ -35,18 +35,18 @@
       "react-app/jest"
     ]
   },
+  "jest": {
+    "verbose": true,
+    "testEnvironment": "jsdom",
+    "moduleNameMapper": {
+        "\\.(css|less)$": "<rootDir>/test/__mocks__/styleMock.js"
+  },
   "browserslist": {
     "production": [
       ">0.2%",
       "not dead",
       "not op_mini all"
     ],
-  "jest": {
-    "verbose": true,
-    "testEnvironment": "jsdom",
-    "moduleNameMapper": {
-        "\\.(css|less)$": "<rootDir>/test/__mocks__/styleMock.js"
-    },
     "testMatch": [
         "<rootDir>/test/**/*.test.tsx",
         "<rootDir>/test/**/*.test.ts"
@@ -54,8 +54,7 @@
     "transform": {
         "^.+\\.tsx?$": "ts-jest",
         "\\.js$": "babel-jest"
-    }
-  },
+    },
     "development": [
       "last 1 chrome version",
       "last 1 firefox version",
@@ -81,4 +80,5 @@
     "vite-plugin-svgr": "^3.3.0",
     "vite-tsconfig-paths": "^4.3.1"
   }
+}
 }
