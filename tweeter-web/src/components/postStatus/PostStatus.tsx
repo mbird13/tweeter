@@ -4,14 +4,17 @@ import { useMessageActions } from "../toaster/MessageHooks";
 import { useUserInfo } from "../userInfo/UserInfoHooks";
 import { PostStatusPresenter } from "../../presenters/PostStatusPresenter";
 
-const PostStatus = () => {
+interface Props {
+  presenter?: PostStatusPresenter
+}
+const PostStatus = (props: Props) => {
   const { displayInfoMessage, displayErrorMessage, deleteMessage } = useMessageActions();
   const { currentUser, authToken } = useUserInfo();
   const [post, setPost] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const presenter = useRef<PostStatusPresenter | null>(null);
-  if (!presenter.current) presenter.current = new PostStatusPresenter({
+  if (!presenter.current) presenter.current = props.presenter ?? new PostStatusPresenter({
     setIsLoading: setIsLoading,
     displayInfoMessage: displayInfoMessage,
     displayErrorMessage: displayErrorMessage,
