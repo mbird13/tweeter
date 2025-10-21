@@ -32,7 +32,7 @@ describe("Login Component", () => {
         expect(signInButton).toBeDisabled();
 
         await enableButton(user, aliasField, passwordField, signInButton);
-        await user.clear(aliasField);
+        await user.clear(passwordField);
         expect(signInButton).toBeDisabled();
         
     })

@@ -41,7 +41,7 @@ describe("PostStatusPresenter", () => {
         anything()
       )
     ).once();
-    const [authoken, captureStatus] = capture(mockStatusService.postStatus).last();
+    const [capturedAuthtoken, captureStatus] = capture(mockStatusService.postStatus).last();
 
     expect(captureStatus.post).toEqual('Hello world');
   });
