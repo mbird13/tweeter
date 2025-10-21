@@ -10,6 +10,7 @@ import { LoginPresenter } from "../../../presenters/LoginPresenter";
 
 interface Props {
   originalUrl?: string;
+  presenter?: LoginPresenter
 }
 
 const Login = (props: Props) => {
@@ -24,7 +25,7 @@ const Login = (props: Props) => {
 
   const presenter = useRef<LoginPresenter | null>(null)
   if (!presenter.current) {
-    presenter.current = new LoginPresenter({
+    presenter.current = props.presenter ?? new LoginPresenter({
       setIsLoading,
       navigate,
       updateUserInfo,
