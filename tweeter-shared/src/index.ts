@@ -7,3 +7,13 @@ export { AuthToken } from "./model/domain/AuthToken";
 // All classes that should be avaialble to other modules need to exported here. export * does not work when 
 // uploading to lambda. Instead we have to list each export.
 export { FakeData } from "./util/FakeData";
+
+//DTOs
+export type { UserDto } from "./model/dto/UserDto"
+
+//Requests
+export type { PagedUserItemRequest } from "./model/net/request/PagedUserItemRequest"
+
+
+//Responses
+export type {PagedUserItemResponse} from "./model/net/response/PagedUserItemResponse"
