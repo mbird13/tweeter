@@ -23,6 +23,6 @@ export type {TweeterResponse} from "./model/net/response/TweeterResponse"
 export type {PagedItemResponse } from "./model/net/response/PagedItemResponse"
 export type {IsFollowerResponse} from "./model/net/response/IsFollowerResponse"
 export type { CountResponse } from "./model/net/response/CountResponse";
-
+export type { FollowResponse } from "./model/net/response/FollowResponse"
 
 

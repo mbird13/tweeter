@@ -44,43 +44,37 @@ export class FollowService implements Service{
       return FakeData.instance.getFolloweeCount(user.alias);
     };
 
-  // public async getFollowerCount (
-  //     token: string,
-  //     user: User
-  //   ): Promise<number> {
-  //     // TODO: Replace with the result of calling server
-  //     return FakeData.instance.getFollowerCount(user.alias);
-  //   };
+  public async getFollowerCount (
+      token: string,
+      user: User
+    ): Promise<number> {
+      // TODO: Replace with the result of calling server
+      return FakeData.instance.getFollowerCount(user.alias);
+    };
 
-  // public async follow(
-  //     token: string,
-  //     userToFollow: User
-  //     ): Promise<[followerCount: number, followeeCount: number]> {
-  //     // Pause so we can see the follow message. Remove when connected to the server
-  //     await new Promise((f) => setTimeout(f, 2000));
+  public async follow(
+      token: string,
+      userToFollow: User
+      ): Promise<[followerCount: number, followeeCount: number]> {
+      // TODO: Call the server
   
-  //     // TODO: Call the server
-  
-  //     const followerCount = await this.getFollowerCount(authToken, userToFollow);
-  //     const followeeCount = await this.getFolloweeCount(authToken, userToFollow);
+      const followerCount = await this.getFollowerCount(token, userToFollow);
+      const followeeCount = await this.getFolloweeCount(token, userToFollow);
 
-  //     return [followerCount, followeeCount];
-  // };
+      return [followerCount, followeeCount];
+  };
 
-  // public async unfollow(
-  //     token: string,
-  //     userToUnfollow: User
-  //   ): Promise<[followerCount: number, followeeCount: number]> {
-  //     // Pause so we can see the unfollow message. Remove when connected to the server
-  //     await new Promise((f) => setTimeout(f, 2000));
+  public async unfollow(
+      token: string,
+      userToUnfollow: User
+    ): Promise<[followerCount: number, followeeCount: number]> {
+      // TODO: Call the server
   
-  //     // TODO: Call the server
+      const followerCount = await this.getFollowerCount(token, userToUnfollow);
+      const followeeCount = await this.getFolloweeCount(token, userToUnfollow);
   
-  //     const followerCount = await this.getFollowerCount(authToken, userToUnfollow);
-  //     const followeeCount = await this.getFolloweeCount(authToken, userToUnfollow);
-  
-  //     return [followerCount, followeeCount];
-  // };
+      return [followerCount, followeeCount];
+  };
 
     
 }
