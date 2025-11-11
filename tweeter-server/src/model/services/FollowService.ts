@@ -35,21 +35,21 @@ export class FollowService implements Service{
 
   public async getFolloweeCount (
       token: string,
-      user: User
+      user: UserDto
     ): Promise<number> {
       return FakeData.instance.getFolloweeCount(user.alias);
     };
 
   public async getFollowerCount (
       token: string,
-      user: User
+      user: UserDto
     ): Promise<number> {
       return FakeData.instance.getFollowerCount(user.alias);
     };
 
   public async follow(
       token: string,
-      userToFollow: User
+      userToFollow: UserDto
       ): Promise<[followerCount: number, followeeCount: number]> {  
       const followerCount = await this.getFollowerCount(token, userToFollow);
       const followeeCount = await this.getFolloweeCount(token, userToFollow);
@@ -59,7 +59,7 @@ export class FollowService implements Service{
 
   public async unfollow(
       token: string,
-      userToUnfollow: User
+      userToUnfollow: UserDto
     ): Promise<[followerCount: number, followeeCount: number]> {  
       const followerCount = await this.getFollowerCount(token, userToUnfollow);
       const followeeCount = await this.getFolloweeCount(token, userToUnfollow);

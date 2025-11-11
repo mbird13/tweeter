@@ -10,12 +10,13 @@ export { FakeData } from "./util/FakeData";
 
 //DTOs
 export type { UserDto } from "./model/dto/UserDto"
+export type { StatusDto } from "./model/dto/StatusDto"
 
 //Requests
 export type { TweeterRequest } from "./model/net/request/TweeterRequest"
 export type { PagedItemRequest } from "./model/net/request/PagedItemRequest"
 export type {IsFollowerRequest} from "./model/net/request/IsFollowerRequest"
-export type { CountRequest } from "./model/net/request/CountRequest";
+export type { PostRequest } from "./model/net/request/PostRequest";
 
 
 //Responses

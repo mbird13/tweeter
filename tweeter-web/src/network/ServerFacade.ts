@@ -1,5 +1,5 @@
 import {
-  CountRequest,
+  PostRequest,
   CountResponse,
   FollowResponse,
   IsFollowerRequest,
@@ -10,6 +10,8 @@ import {
   TweeterResponse,
   User,
   UserDto,
+  StatusDto,
+  Status,
 } from "tweeter-shared";
 import { ClientCommunicator } from "./ClientCommunicator";
 
@@ -33,7 +35,7 @@ export class ServerFacade {
     // Handle errors    
     if (response.success) {
       if (items == null) {
-        throw new Error(`No ${item}s found`);
+        throw new Error(`No ${item} items found`);
       } else {
         return [items, response.hasMore];
       }
@@ -80,16 +82,16 @@ export class ServerFacade {
     );
     return response.status;
   }
-  public async getFolloweeCount(request: CountRequest): Promise<number> {
-    const response = await this.postAndHandle<CountRequest, CountResponse>(
+  public async getFolloweeCount(request: PostRequest<UserDto>): Promise<number> {
+    const response = await this.postAndHandle<PostRequest<UserDto>, CountResponse>(
       request,
       "/followee/count"
     );
     return response.count;
   }
 
-  public async getFollowerCount(request: CountRequest): Promise<number> {
-    const response = await this.postAndHandle<CountRequest, CountResponse>(
+  public async getFollowerCount(request: PostRequest<UserDto>): Promise<number> {
+    const response = await this.postAndHandle<PostRequest<UserDto>, CountResponse>(
       request,
       "/follower/count"
     );
@@ -97,9 +99,9 @@ export class ServerFacade {
   }
 
   public async follow(
-    request: CountRequest
+    request: PostRequest<UserDto>
   ): Promise<[followerCount: number, followeeCount: number]> {
-    const response = await this.postAndHandle<CountRequest, FollowResponse>(
+    const response = await this.postAndHandle<PostRequest<UserDto>, FollowResponse>(
       request,
       "/follow"
     );
@@ -107,13 +109,37 @@ export class ServerFacade {
   }
 
   public async unfollow(
-    request: CountRequest
+    request: PostRequest<UserDto>
   ): Promise<[followerCount: number, followeeCount: number]> {
-    const response = await this.postAndHandle<CountRequest, FollowResponse>(
+    const response = await this.postAndHandle<PostRequest<UserDto>, FollowResponse>(
       request,
       "/unfollow"
     );
     return [response.followerCount, response.followeeCount];
+  }
+
+  //Status
+  public async getMoreFeedItems(
+    request: PagedItemRequest <StatusDto>
+  ): Promise<[Status[], boolean]> {
+    return this.getListItem<StatusDto, Status>(request, "feed", Status.fromDto);
+  }
+
+
+  public async getMoreStoryItems(
+    request: PagedItemRequest <StatusDto>
+  ): Promise<[Status[], boolean]> {
+    return this.getListItem<StatusDto, Status>(request, "story", Status.fromDto);
+  }
+
+  public async post(
+    request: PostRequest<StatusDto>
+  ): Promise<void> {
+    await this.postAndHandle<PostRequest<StatusDto>, TweeterResponse>(
+      request,
+      "/story/post"
+    );
+    return;
   }
 
 }

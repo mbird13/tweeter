@@ -1,10 +1,9 @@
-import { CountRequest, CountResponse, User } from "tweeter-shared"
+import { PostRequest, CountResponse, UserDto } from "tweeter-shared"
 import { FollowService } from "../../model/services/FollowService"
 
-export const handler = async (request: CountRequest): Promise<CountResponse> => {
+export const handler = async (request: PostRequest<UserDto>): Promise<CountResponse> => {
     const followService = new FollowService();
-    const user = User.fromDto(request.user);
-    const response = await followService.getFolloweeCount(request.token, user!);
+    const response = await followService.getFolloweeCount(request.token, request.item);
 
     return {
         success: true,

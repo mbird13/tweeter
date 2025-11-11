@@ -42,7 +42,7 @@ export class FollowService implements Service{
         user: User
       ): Promise<number> {
         // TODO: Replace with the result of calling server
-        const request = {token: authToken.token, user: user.dto}
+        const request = {token: authToken.token, item: user.dto}
         return this.serverFacade.getFolloweeCount(request);
       };
 
@@ -51,7 +51,7 @@ export class FollowService implements Service{
         user: User
       ): Promise<number> {
         // TODO: Replace with the result of calling server
-        const request = {token: authToken.token, user: user.dto}
+        const request = {token: authToken.token, item: user.dto}
         return this.serverFacade.getFollowerCount(request);
       };
 
@@ -63,7 +63,7 @@ export class FollowService implements Service{
         //await new Promise((f) => setTimeout(f, 2000));
     
         // TODO: Call the server
-        const request = {token: authToken.token, user: userToFollow.dto}
+        const request = {token: authToken.token, item: userToFollow.dto}
         return this.serverFacade.follow(request);
     };
 
@@ -75,7 +75,7 @@ export class FollowService implements Service{
         //await new Promise((f) => setTimeout(f, 2000));
     
         // TODO: Call the server
-        const request = {token: authToken.token, user: userToUnfollow.dto}
+        const request = {token: authToken.token, item: userToUnfollow.dto}
         return this.serverFacade.unfollow(request);
     };
 }
