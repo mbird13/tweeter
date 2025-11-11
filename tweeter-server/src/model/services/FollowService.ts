@@ -8,7 +8,6 @@ export class FollowService implements Service{
       pageSize: number,
       lastItem: UserDto | null
     ): Promise<[UserDto[], boolean]> {
-      // TODO: Replace FakeData
       return this.getFakeData(lastItem, pageSize, userAlias);
     };
   
@@ -24,7 +23,6 @@ export class FollowService implements Service{
       pageSize: number,
       lastItem: UserDto | null
     ): Promise<[UserDto[], boolean]> {
-      // TODO: Replace with the result of calling server
       return this.getFakeData(lastItem, pageSize, userAlias);      };  
 
   public async getIsFollowerStatus (
@@ -32,7 +30,6 @@ export class FollowService implements Service{
       user: UserDto,
       selectedUser: UserDto
     ): Promise<boolean> {
-      // TODO: Replace with the result of calling server
       return FakeData.instance.isFollower();
     };
 
@@ -40,7 +37,6 @@ export class FollowService implements Service{
       token: string,
       user: User
     ): Promise<number> {
-      // TODO: Replace with the result of calling server
       return FakeData.instance.getFolloweeCount(user.alias);
     };
 
@@ -48,16 +44,13 @@ export class FollowService implements Service{
       token: string,
       user: User
     ): Promise<number> {
-      // TODO: Replace with the result of calling server
       return FakeData.instance.getFollowerCount(user.alias);
     };
 
   public async follow(
       token: string,
       userToFollow: User
-      ): Promise<[followerCount: number, followeeCount: number]> {
-      // TODO: Call the server
-  
+      ): Promise<[followerCount: number, followeeCount: number]> {  
       const followerCount = await this.getFollowerCount(token, userToFollow);
       const followeeCount = await this.getFolloweeCount(token, userToFollow);
 
@@ -67,9 +60,7 @@ export class FollowService implements Service{
   public async unfollow(
       token: string,
       userToUnfollow: User
-    ): Promise<[followerCount: number, followeeCount: number]> {
-      // TODO: Call the server
-  
+    ): Promise<[followerCount: number, followeeCount: number]> {  
       const followerCount = await this.getFollowerCount(token, userToUnfollow);
       const followeeCount = await this.getFolloweeCount(token, userToUnfollow);
   

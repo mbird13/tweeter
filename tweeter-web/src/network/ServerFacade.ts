@@ -1,19 +1,24 @@
 import {
+  CountRequest,
+  CountResponse,
+  FollowResponse,
   IsFollowerRequest,
   IsFollowerResponse,
   PagedItemRequest,
   PagedItemResponse,
+  TweeterRequest,
+  TweeterResponse,
   User,
   UserDto,
 } from "tweeter-shared";
 import { ClientCommunicator } from "./ClientCommunicator";
 
 export class ServerFacade {
-  private SERVER_URL = "https://qzcjyws4t9.execute-api.us-east-1.amazonaws.com/dev";
+  private SERVER_URL = "https://5tazx6l5ua.execute-api.us-east-1.amazonaws.com/dev";
 
   private clientCommunicator = new ClientCommunicator(this.SERVER_URL);
 
-  public async getListItem<T, U>(request: PagedItemRequest<T>, item: string, fromDto: (dto: T | null) => U | null): Promise<[U[], boolean]> {
+  private async getListItem<T, U>(request: PagedItemRequest<T>, item: string, fromDto: (dto: T | null) => U | null): Promise<[U[], boolean]> {
     const response = await this.clientCommunicator.doPost<
       PagedItemRequest<T>,
       PagedItemResponse<T>
@@ -38,6 +43,23 @@ export class ServerFacade {
     }
   }
 
+  private async postAndHandle<RequestType extends TweeterRequest, ResponseType extends TweeterResponse>(
+    request: RequestType,
+    endpoint: string
+  ): Promise<ResponseType> {
+    const response = await this.clientCommunicator.doPost<RequestType, ResponseType>(
+      request,
+      endpoint
+    );
+
+    if (response.success) {
+      return response;
+    } else {
+      console.error(response);
+      throw new Error(response.message ?? undefined);
+    }
+}
+
   public async getMoreFollowees(
     request: PagedItemRequest <UserDto>
   ): Promise<[User[], boolean]> {
@@ -51,22 +73,47 @@ export class ServerFacade {
     return this.getListItem<UserDto, User>(request, "follower", User.fromDto);
   }
 
-  public async getFollowerStatus(
-    request: IsFollowerRequest
-  ): Promise<boolean> {
-    const response = await this.clientCommunicator.doPost<
-      IsFollowerRequest,
-      IsFollowerResponse
-    >(request, "/follower/status");
-
-    // Convert the UserDto array returned by ClientCommunicator to a User array
-
-    // Handle errors    
-    if (response.success) {
-      return response.status;
-    } else {
-      console.error(response);
-      throw new Error(response.message ?? undefined);
-    }
+  public async getFollowerStatus(request: IsFollowerRequest): Promise<boolean> {
+    const response = await this.postAndHandle<IsFollowerRequest, IsFollowerResponse>(
+      request,
+      "/follower/status"
+    );
+    return response.status;
   }
+  public async getFolloweeCount(request: CountRequest): Promise<number> {
+    const response = await this.postAndHandle<CountRequest, CountResponse>(
+      request,
+      "/followee/count"
+    );
+    return response.count;
+  }
+
+  public async getFollowerCount(request: CountRequest): Promise<number> {
+    const response = await this.postAndHandle<CountRequest, CountResponse>(
+      request,
+      "/follower/count"
+    );
+    return response.count;
+  }
+
+  public async follow(
+    request: CountRequest
+  ): Promise<[followerCount: number, followeeCount: number]> {
+    const response = await this.postAndHandle<CountRequest, FollowResponse>(
+      request,
+      "/follow"
+    );
+    return [response.followerCount, response.followeeCount];
+  }
+
+  public async unfollow(
+    request: CountRequest
+  ): Promise<[followerCount: number, followeeCount: number]> {
+    const response = await this.postAndHandle<CountRequest, FollowResponse>(
+      request,
+      "/unfollow"
+    );
+    return [response.followerCount, response.followeeCount];
+  }
+
 }
