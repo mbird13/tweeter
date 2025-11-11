@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import { userEvent, UserEvent } from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { anything, instance, mock, verify, when } from "@typestrong/ts-mockito";
@@ -41,7 +41,9 @@ describe("PostStatus Component", () => {
 
   it("enables both buttons when text field has text", async () => {
     const { user, textArea, postButton, clearButton } = renderPostStatus();
+    await act(async () => {
     await user.type(textArea, "Hello World");
+    });
 
     expect(postButton).toBeEnabled();
     expect(clearButton).toBeEnabled();
@@ -50,11 +52,15 @@ describe("PostStatus Component", () => {
   it("disables both buttons when text field is cleared", async () => {
     const { user, textArea, postButton, clearButton } = renderPostStatus();
 
+    await act(async () => {
     await user.type(textArea, "Hello World");
+    });
     expect(postButton).toBeEnabled();
     expect(clearButton).toBeEnabled();
 
+    await act(async () => {
     await user.clear(textArea);
+    });
     expect(postButton).toBeDisabled();
     expect(clearButton).toBeDisabled();
   });
@@ -62,8 +68,10 @@ describe("PostStatus Component", () => {
   it("calls the presenter's postStatus method with correct parameters when Post Status button is pressed", async () => {
     const { user, textArea, postButton } = renderPostStatus(mockPresenterInstance);
 
+    await act(async () => {
     await user.type(textArea, "Posting a status!");
     await user.click(postButton);
+    });
 
     verify(mockPresenter.submitPost(anything(), "Posting a status!", mockUser, mockAuthToken)).once();
   });

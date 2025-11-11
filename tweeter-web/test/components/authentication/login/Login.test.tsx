@@ -1,6 +1,6 @@
 import { MemoryRouter } from "react-router-dom";
 import Login from "../../../../src/components/authentication/login/Login"
-import {render, screen} from "@testing-library/react"
+import {act, cleanup, render, screen, waitFor} from "@testing-library/react"
 import {UserEvent, userEvent} from "@testing-library/user-event"
 import "@testing-library/jest-dom"
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -11,6 +11,7 @@ import { LoginPresenter } from "../../../../src/presenters/LoginPresenter";
 library.add(fab);
 
 describe("Login Component", () => {
+
 
     it("starts with the sign in button disabled", () => {
         const { signInButton } = renderLoginAndGetElements("/");
@@ -35,6 +36,7 @@ describe("Login Component", () => {
         await user.clear(passwordField);
         expect(signInButton).toBeDisabled();
         
+        
     })
 
     it("calls the presenter's login method with correct parameters when sign in button clicked", async () => {
@@ -54,9 +56,13 @@ describe("Login Component", () => {
 
 
 async function enableButton(user: UserEvent, aliasField: HTMLElement, passwordField: HTMLElement, signInButton: HTMLElement) {
-    await user.type(aliasField, "TEXT HERE");
-    await user.type(passwordField, "text there");
-    expect(signInButton).toBeEnabled();
+    await act(async () => {
+        await user.type(aliasField, "TEXT HERE");
+        await user.type(passwordField, "text there");
+    });
+    await waitFor(() => {
+        expect(signInButton).toBeEnabled();
+    });
 }
 
 function renderLogin(originalUrl: string, presenter?: LoginPresenter) {
