@@ -12,6 +12,13 @@ import {
   UserDto,
   StatusDto,
   Status,
+  UserRequest,
+  UserResponse,
+  RegisterRequest,
+  AuthenticationResponse,
+  AuthToken,
+  AuthenticationRequest,
+  AuthenticatedRequest,
 } from "tweeter-shared";
 import { ClientCommunicator } from "./ClientCommunicator";
 
@@ -138,6 +145,38 @@ export class ServerFacade {
     await this.postAndHandle<PostRequest<StatusDto>, TweeterResponse>(
       request,
       "/story/post"
+    );
+    return;
+  }
+
+  public async getUser(request: UserRequest) : Promise<User | null> {
+    const response = await this.postAndHandle<UserRequest, UserResponse>(
+      request,
+      "/user"
+    );
+    return User.fromDto(response.user);
+  }
+
+  public async register(request: RegisterRequest) : Promise<[User | null, AuthToken]> {
+    const response = await this.postAndHandle<RegisterRequest, AuthenticationResponse>(
+      request,
+      "/auth/register"
+    );
+    return [User.fromDto(response.user), response.authToken];
+  }
+
+  public async login(request: AuthenticationRequest) : Promise<[User | null, AuthToken]> {
+    const response = await this.postAndHandle<AuthenticationRequest, AuthenticationResponse>(
+      request,
+      "/auth/login"
+    );
+    return [User.fromDto(response.user), response.authToken];
+  }
+
+  public async logout(request: AuthenticatedRequest) : Promise<void> {
+    await this.postAndHandle<AuthenticatedRequest, TweeterResponse>(
+      request,
+      "/auth/logout"
     );
     return;
   }
