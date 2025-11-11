@@ -23,7 +23,7 @@ export class StatusService implements Service {
         ): Promise<[Status[], boolean]> {
         const request = {token: authToken.token, userAlias: userAlias, pageSize: pageSize, lastItem: lastItem == null ? null : lastItem.dto}
         return this.serverFacade.getMoreStoryItems(request);
-    };
+    }; 
 
     public async postStatus(
         authToken: AuthToken,

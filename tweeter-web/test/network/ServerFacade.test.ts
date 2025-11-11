@@ -1,14 +1,26 @@
 import "@testing-library/jest-dom";
-import { AuthToken, User } from "tweeter-shared";
+import { AuthToken, PagedItemRequest, PostRequest, TweeterRequest, TweeterResponse, User, UserDto } from "tweeter-shared";
 import { ServerFacade } from "../../src/network/ServerFacade";
 import "isomorphic-fetch"
 
-describe('ServerFacade Integration', () => {
+describe('ServerFacade', () => {
   const serverFacade = new ServerFacade();
 
-  const TEST_ALIAS = `test_${Date.now()}@example`;
+  const doPostSpy = jest.spyOn(
+    serverFacade["clientCommunicator"],
+    "doPost"
+  );
 
-  it('should register a new user and return a User and AuthToken', async () => {
+  const TEST_ALIAS = `test_${Date.now()}@example`;
+  const TEST_AUTHTOKEN = `token_${Date.now()}`;
+  const TEST_USERDTO = {alias: TEST_ALIAS, firstName: `user_${Date.now()}`, lastName: `last_${Date.now()}`, imageUrl: `image_${Date.now()}`}
+  const TEST_PAGESIZE = 5;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should register a new user and return a User and AuthToken from register()', async () => {
     const request = {
         firstName: `user_${Date.now()}`, 
         lastName: "lastName", 
@@ -21,55 +33,72 @@ describe('ServerFacade Integration', () => {
 
     expect(user).toBeInstanceOf(User);
     expect(user?.alias).toBe("@allen");//request.alias);
-    console.log(authToken);
     expect(authToken).toBeInstanceOf(AuthToken);
     expect(typeof authToken.token).toBe('string');
     expect(authToken.token.length).toBeGreaterThan(0);
+
+    checkDoPostSpy(doPostSpy, request, /register/);
   });
 
-    // describe("Server Facade", () => {
-    // const mockUser = new User("first", "last", "alias", "imageUrl");
-    // const mockAuthToken = new AuthToken("ABC", Date.now());
+  it('should return a list of Users and hasMore flag from getMoreFollowers()', async () => {
+  const request: PagedItemRequest<User> = {
+    token: TEST_AUTHTOKEN,
+    userAlias: "@allen",
+    pageSize: TEST_PAGESIZE,
+    lastItem: null
+  }
 
-    // const serverFacade = new ServerFacade();
+  const [users, hasMore] = await serverFacade.getMoreFollowers(request);
 
-    // beforeAll(() => {
-    //     (useUserInfo as jest.Mock).mockReturnValue({
-    //     currentUser: mockUser,
-    //     authToken: mockAuthToken,
-    //     });
-    // });
+  expect(Array.isArray(users)).toBe(true);
+  expect(users[0]).toBeInstanceOf(User);
+  expect(users.length).toBeLessThanOrEqual(TEST_PAGESIZE)
+  expect(typeof hasMore).toBe('boolean');
+  expect(hasMore).toBe(true);
 
-    // beforeEach(() => {
-    
-    // });
+  checkDoPostSpy(doPostSpy, request, /follower/);
+});
 
-    // it("succesfully registers a new user", () => {
-    //     const registerRequest = {firstName: "firstName", lastName: "lastName", imageStringBase64: "", imageFileExtension: ".png", alias: "@name", password: "passW0rd" }
-    //     const response = await serverFacade.register(registerRequest);
-    //     expect(response[0]?.alias).toBe("@name");
-    //     expect(response[1]).toBeDefined();
-    // });
+it('should return count from getFolloweeCount()', async () => {
+    const request: PostRequest<UserDto> = {
+      token: TEST_AUTHTOKEN,
+      item: TEST_USERDTO,
+    };
 
-    // it("enables both buttons when text field has text", async () => {
-    //     const { user, textArea, postButton, clearButton } = renderPostStatus();
-    //     await user.type(textArea, "Hello World");
+    const count = await serverFacade.getFolloweeCount(request);
 
-    //     expect(postButton).toBeEnabled();
-    //     expect(clearButton).toBeEnabled();
-    // });
+    expect(count).toBeGreaterThanOrEqual(0);
+    expect(typeof count).toBe('number');
 
-    // it("disables both buttons when text field is cleared", async () => {
-    //     const { user, textArea, postButton, clearButton } = renderPostStatus();
+    checkDoPostSpy(doPostSpy, request, /followee\/count/)
+  });
 
-    //     await user.type(textArea, "Hello World");
-    //     expect(postButton).toBeEnabled();
-    //     expect(clearButton).toBeEnabled();
+  it('should return count from getFollowerCount()', async () => {
+    const request: PostRequest<UserDto> = {
+      token: TEST_AUTHTOKEN,
+      item: TEST_USERDTO,
+    };
 
-    //     await user.clear(textArea);
-    //     expect(postButton).toBeDisabled();
-    //     expect(clearButton).toBeDisabled();
-    // });
+    const count = await serverFacade.getFollowerCount(request);
+
+    expect(count).toBeGreaterThanOrEqual(0);
+    expect(typeof count).toBe('number');
+
+    checkDoPostSpy(doPostSpy, request, /follower\/count/);
+  });
+
+
 
 
 });
+
+function checkDoPostSpy(
+  doPostSpy: jest.SpyInstance<Promise<TweeterResponse>, [req: TweeterRequest | undefined, endpoint: string, headers?: Headers | undefined], any>, 
+  request: TweeterRequest, 
+  regex: RegExp) {
+  expect(doPostSpy).toHaveBeenCalledTimes(1);
+  expect(doPostSpy).toHaveBeenCalledWith(
+    expect.objectContaining(request),
+    expect.stringMatching(regex)
+  );
+}
