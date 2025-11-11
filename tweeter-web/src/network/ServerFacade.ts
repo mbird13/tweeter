@@ -162,7 +162,7 @@ export class ServerFacade {
       request,
       "/auth/register"
     );
-    return [User.fromDto(response.user), response.authToken];
+    return [User.fromDto(response.user), new AuthToken(response.authToken.token, response.authToken.timestamp) ];
   }
 
   public async login(request: AuthenticationRequest) : Promise<[User | null, AuthToken]> {
@@ -170,7 +170,7 @@ export class ServerFacade {
       request,
       "/auth/login"
     );
-    return [User.fromDto(response.user), response.authToken];
+    return [User.fromDto(response.user), new AuthToken(response.authToken.token, response.authToken.timestamp)];
   }
 
   public async logout(request: AuthenticatedRequest) : Promise<void> {

@@ -11,6 +11,7 @@ export { FakeData } from "./util/FakeData";
 //DTOs
 export type { UserDto } from "./model/dto/UserDto"
 export type { StatusDto } from "./model/dto/StatusDto"
+export type { AuthTokenDto } from "./model/dto/AuthTokenDto"
 
 //Requests
 export type { TweeterRequest } from "./model/net/request/TweeterRequest"

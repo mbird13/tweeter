@@ -29,11 +29,15 @@ describe("Login Component", () => {
         
         await enableButton(user, aliasField, passwordField, signInButton);
 
+        await act(async () => {
         await user.clear(aliasField);
+        });
         expect(signInButton).toBeDisabled();
 
         await enableButton(user, aliasField, passwordField, signInButton);
+        await act(async () => {
         await user.clear(passwordField);
+        });
         expect(signInButton).toBeDisabled();
         
         
@@ -47,8 +51,9 @@ describe("Login Component", () => {
 
         await enableButton(user, aliasField, passwordField, signInButton);
 
+        await act(async () => {
         await user.click(signInButton);
-
+        });
         verify(mockPresenter.doLogin("/path")).once();
     })
 })

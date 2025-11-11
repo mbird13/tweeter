@@ -1,5 +1,4 @@
-import { Buffer } from "buffer";
-import { AuthToken, UserDto, FakeData } from "tweeter-shared";
+import { UserDto, FakeData, AuthTokenDto } from "tweeter-shared";
 import { Service } from "./Service";
 
 export class UserService implements Service {
@@ -19,7 +18,7 @@ export class UserService implements Service {
     password: string,
     imageStringBase64: string,
     imageFileExtension: string
-    ): Promise<[UserDto, AuthToken]> {
+    ): Promise<[UserDto, AuthTokenDto]> {
 
     // TODO: Replace with the result adding a user to the database
     const user = FakeData.instance.firstUser;
@@ -27,14 +26,15 @@ export class UserService implements Service {
     if (user === null) {
       throw new Error("Invalid registration");
     }
+    const authToken = FakeData.instance.authToken;
 
-    return [user.dto, FakeData.instance.authToken];
+    return [user.dto, { token: authToken.token, timestamp: authToken.timestamp} ];
   };
 
   public async login(
     alias: string,
     password: string
-  ): Promise<[UserDto, AuthToken]> {
+  ): Promise<[UserDto, AuthTokenDto]> {
     // TODO: Replace with the result of calling the server
     const user = FakeData.instance.firstUser;
 
@@ -42,7 +42,9 @@ export class UserService implements Service {
       throw new Error("Invalid alias or password");
     }
 
-    return [user.dto, FakeData.instance.authToken];
+    const authToken = FakeData.instance.authToken;
+
+    return [user.dto, { token: authToken.token, timestamp: authToken.timestamp} ];
   };
 
   public async logout(token: string): Promise<void> {
