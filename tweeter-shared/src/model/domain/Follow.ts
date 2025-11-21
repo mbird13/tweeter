@@ -1,27 +1,25 @@
-import { User } from "./User";
-
 export class Follow {
-    private _follower: User;
-    private _followee: User;
+    private _followerAlias: string;
+    private _followeeAlias: string;
 
-    public constructor(follower: User, followee: User) {
-        this._follower = follower;
-        this._followee = followee;
+    public constructor(follower: string, followee: string) {
+        this._followerAlias = follower;
+        this._followeeAlias = followee;
     }
 
-    public get follower(): User {
-        return this._follower;
+    public get follower(): string {
+        return this._followerAlias;
     }
 
-    public set follower(value: User) {
-        this._follower = value;
+    public set follower(value: string) {
+        this._followerAlias = value;
     }
     
-    public get followee(): User {
-        return this._followee;
+    public get followee(): string {
+        return this._followeeAlias;
     }
 
-    public set followee(value: User) {
-        this._followee = value;
+    public set followee(value: string) {
+        this._followeeAlias = value;
     }    
 }
