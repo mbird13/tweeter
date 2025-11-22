@@ -21,7 +21,13 @@ export class Service {
 
         await this.authtokenDao.updateLastUsed(token, Date.now());
 
-        const [user, _] = (await this.userDao.getItem(item.userHandle))!
+        const result = await this.userDao.getItem(item.userHandle);
+        
+        if (!result) {
+            throw new Error("Bad Request : Invalid Authtoken");
+        }
+
+        const [user, _] = result!
         
         return user;
     }

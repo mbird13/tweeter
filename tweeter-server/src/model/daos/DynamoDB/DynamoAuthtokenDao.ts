@@ -1,10 +1,8 @@
 import {
-  BatchGetCommand,
   DeleteCommand,
   DynamoDBDocumentClient,
   GetCommand,
   PutCommand,
-  QueryCommand,
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
@@ -64,7 +62,7 @@ export class DynamoAuthtokenDao implements AuthtokenDaoInterface {
               ExpressionAttributeValues: { ":las": newDate },
               UpdateExpression:
                 "SET " +
-                this.lastUsedAttr + " = :las, "
+                this.lastUsedAttr + " = :las"
             };
             await this.client.send(new UpdateCommand(params));
     }
