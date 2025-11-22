@@ -1,22 +1,35 @@
-import { Status, FakeData, StatusDto } from "tweeter-shared";
+import { Status, StatusDto } from "tweeter-shared";
 import { Service } from "./Service";
+import { StoryDaoInterface } from "../daos/interfaces/StoryDaoInterface";
+import { FeedDaoInterface } from "../daos/interfaces/FeedDaoInterface";
+import { DaoFactoryInterface } from "../factory/DaoFactoryInterface";
+import { FollowDaoInterface } from "../daos/interfaces/FollowDaoInterface";
 
-export class StatusService implements Service {
+export class StatusService extends Service {
+
+  storyDao: StoryDaoInterface;
+  feedDao: FeedDaoInterface;
+  followDao: FollowDaoInterface;
+  
+    constructor(daoFactory: DaoFactoryInterface) {
+      super(daoFactory);
+      this.storyDao = daoFactory.createStoryDao();
+      this.feedDao = daoFactory.createFeedDao();
+      this.followDao = daoFactory.createFollowDao();
+    }
+
     public async loadMoreFeedItems(
         token: string,
         userAlias: string,
         pageSize: number,
         lastItem: StatusDto | null
         ): Promise<[StatusDto[], boolean]> {
-        // TODO: Replace with the result of calling server
-        return this.getFakeData(lastItem, pageSize);
-    };
 
-    private async getFakeData(lastItem: StatusDto | null, pageSize: number): Promise<[StatusDto[], boolean]> {
-        const [items, hasMore] = FakeData.instance.getPageOfStatuses(Status.fromDto(lastItem), pageSize);
-        const dtos = items.map((status) => status.dto);
-        return [dtos, hasMore];
-      }
+        this.authenticate(token);
+
+        const [statuses, hasMore] = await this.feedDao.getPageOfFeed(userAlias, pageSize, lastItem == null ? undefined: Status.fromDto(lastItem)!);
+        return [statuses.map((status) => status.dto), hasMore]
+    };
     
     public async loadMoreStoryItems(
         token: string,
@@ -24,14 +37,21 @@ export class StatusService implements Service {
         pageSize: number,
         lastItem: StatusDto | null
         ): Promise<[StatusDto[], boolean]> {
-        // TODO: Replace with the result of calling server
-        return this.getFakeData(lastItem, pageSize);
+        this.authenticate(token);
+
+        const [statuses, hasMore] = await this.storyDao.getPageOfStory(userAlias, pageSize, lastItem == null ? undefined: Status.fromDto(lastItem)!);
+        return [statuses.map((status) => status.dto), hasMore]
     };
 
     public async postStatus(
         token: string,
         newStatus: StatusDto
       ): Promise<void> {
-        await new Promise((f) => setTimeout(f, 1000));
+        const currentUser = await this.authenticate(token);
+
+        await this.storyDao.addStoryItem(Status.fromDto(newStatus)!);
+
+        const followers = (await this.followDao.getFollowers(currentUser.alias)).map((follow) => follow.follower);
+        await followers.forEach(async (follower) => await this.feedDao.addFeedItem(follower, Status.fromDto(newStatus)!));
       };
 }

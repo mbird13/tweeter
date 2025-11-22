@@ -1,16 +1,18 @@
-import { UserDto, FakeData, AuthTokenDto } from "tweeter-shared";
+import { UserDto, AuthTokenDto, User, AuthToken } from "tweeter-shared";
 import { Service } from "./Service";
+import bcrypt from "bcryptjs";
 
-export class UserService implements Service {
+export class UserService extends Service {
   public async getUser (
     token: string,
     alias: string
   ): Promise<UserDto | null> {
-    // TODO: Replace with the result of retrieving the user from the database
-    const user = FakeData.instance.findUserByAlias(alias);
-    return user ? user.dto : null;
+    this.authenticate(token);
+
+    const result = await this.userDao.getItem(alias);
+    return result ? result[0].dto : null;
   };
-    
+  
   public async register(
     firstName: string,
     lastName: string,
@@ -20,34 +22,45 @@ export class UserService implements Service {
     imageFileExtension: string
     ): Promise<[UserDto, AuthTokenDto]> {
 
-    // TODO: Replace with the result adding a user to the database
-    const user = FakeData.instance.firstUser;
+    //TODO: add image to s3 HERE
+
+    const user = new User(firstName, lastName, alias, `${alias}/img`);
+
+    const salt = bcrypt.genSaltSync(10);
+    const hash = bcrypt.hashSync(password, salt);
+
+    await this.userDao.addUser(user, hash);
 
     if (user === null) {
       throw new Error("Invalid registration");
     }
-    const authToken = FakeData.instance.authToken;
 
-    return [user.dto, { token: authToken.token, timestamp: authToken.timestamp} ];
+    return this.generateAuthAndLogin(user);
   };
+
+  private generateAuthAndLogin(user: User) {
+    const auth = AuthToken.Generate();
+    this.authtokenDao.addToken(auth.token, user.alias, auth.timestamp);
+    return [user.dto, auth.dto] as [UserDto, AuthTokenDto];
+  }
 
   public async login(
     alias: string,
     password: string
   ): Promise<[UserDto, AuthTokenDto]> {
-    // TODO: Replace with the result of calling the server
-    const user = FakeData.instance.firstUser;
 
-    if (user === null) {
-      throw new Error("Invalid alias or password");
-    }
+    const result = await this.userDao.getItem(alias);
+    if (!result) { throw new Error("Bad Request: invalid username")}
 
-    const authToken = FakeData.instance.authToken;
+    const [user, hash] = result!;
+    const valid: boolean = bcrypt.compareSync(password, hash);
 
-    return [user.dto, { token: authToken.token, timestamp: authToken.timestamp} ];
+    if (!valid) {throw new Error("Bad Request: invalid password")}
+
+    return this.generateAuthAndLogin(user);
   };
 
   public async logout(token: string): Promise<void> {
-        await new Promise((res) => setTimeout(res, 500));
+    await this.authtokenDao.deleteToken(token);
   };
 }

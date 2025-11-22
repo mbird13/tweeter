@@ -1,18 +1,15 @@
-import { User, FakeData, UserDto, Follow } from "tweeter-shared";
+import { UserDto, Follow } from "tweeter-shared";
 import { Service } from "./Service";
 import { FollowDaoInterface } from "../daos/interfaces/FollowDaoInterface";
 import { DaoFactoryInterface } from "../factory/DaoFactoryInterface";
-import { UserDaoInterface } from "../daos/interfaces/UserDaoInteface";
 
 export class FollowService extends Service{
 
   followDao: FollowDaoInterface;
-  userDao: UserDaoInterface;
 
   constructor(daoFactory: DaoFactoryInterface) {
-    super();
+    super(daoFactory);
     this.followDao = daoFactory.createFollowDao();
-    this.userDao = daoFactory.createUserDao();
   }
 
   public async loadMoreFollowees (
@@ -25,7 +22,7 @@ export class FollowService extends Service{
       this.authenticate(token);
 
       const [follows, hasMore] = await this.followDao.getPageOfFollowees(userAlias, pageSize, lastItem == null ? undefined: lastItem!.alias);
-      const users = await this.userDao.getBatchUsers(follows.map((follow) => follow.followee));
+      const users = await this.userDao.batchGetUser(follows.map((follow) => follow.followee));
       return [users, hasMore];
 
     };
@@ -40,7 +37,7 @@ export class FollowService extends Service{
       this.authenticate(token);
 
       const [follows, hasMore] = await this.followDao.getPageOfFollowers(userAlias, pageSize, lastItem == null ? undefined: lastItem!.alias);
-      const users = await this.userDao.getBatchUsers(follows.map((follow) => follow.follower));
+      const users = await this.userDao.batchGetUser(follows.map((follow) => follow.follower));
       return [users, hasMore];    
     };  
 
@@ -80,7 +77,7 @@ export class FollowService extends Service{
       userToFollow: UserDto
       ): Promise<[followerCount: number, followeeCount: number]> {  
 
-      const currentUser = this.authenticate(token);
+      const currentUser = await this.authenticate(token);
       //currentUser = follower, userToFollow = followee
       this.followDao.createFollow(new Follow(currentUser.alias, userToFollow.alias));
 
@@ -95,7 +92,7 @@ export class FollowService extends Service{
       token: string,
       userToUnfollow: UserDto
     ): Promise<[followerCount: number, followeeCount: number]> { 
-      const currentUser = this.authenticate(token);
+      const currentUser = await this.authenticate(token);
 
       //currentUser = follower, userToUnfollow = followee
       this.followDao.deleteFollow(currentUser.alias, userToUnfollow.alias)
