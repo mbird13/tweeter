@@ -25,7 +25,7 @@ export class StatusService extends Service {
         lastItem: StatusDto | null
         ): Promise<[StatusDto[], boolean]> {
 
-        this.authenticate(token);
+        await this.authenticate(token);
 
         const [statuses, hasMore] = await this.feedDao.getPageOfFeed(userAlias, pageSize, lastItem == null ? undefined: Status.fromDto(lastItem)!);
         return [statuses.map((status) => status.dto), hasMore]
@@ -37,7 +37,7 @@ export class StatusService extends Service {
         pageSize: number,
         lastItem: StatusDto | null
         ): Promise<[StatusDto[], boolean]> {
-        this.authenticate(token);
+        await this.authenticate(token);
 
         const [statuses, hasMore] = await this.storyDao.getPageOfStory(userAlias, pageSize, lastItem == null ? undefined: Status.fromDto(lastItem)!);
         return [statuses.map((status) => status.dto), hasMore]

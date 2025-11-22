@@ -7,7 +7,8 @@ export class UserService extends Service {
     token: string,
     alias: string
   ): Promise<UserDto | null> {
-    this.authenticate(token);
+    
+    await this.authenticate(token);
 
     const result = await this.userDao.getItem(alias);
     return result ? result[0].dto : null;

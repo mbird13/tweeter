@@ -19,7 +19,7 @@ export class FollowService extends Service{
       lastItem: UserDto | null
     ): Promise<[UserDto[], boolean]> {
 
-      this.authenticate(token);
+      await this.authenticate(token);
 
       const [follows, hasMore] = await this.followDao.getPageOfFollowees(userAlias, pageSize, lastItem == null ? undefined: lastItem!.alias);
       const users = await this.userDao.batchGetUser(follows.map((follow) => follow.followee));
@@ -34,7 +34,7 @@ export class FollowService extends Service{
       lastItem: UserDto | null
     ): Promise<[UserDto[], boolean]> {
       
-      this.authenticate(token);
+      await this.authenticate(token);
 
       const [follows, hasMore] = await this.followDao.getPageOfFollowers(userAlias, pageSize, lastItem == null ? undefined: lastItem!.alias);
       const users = await this.userDao.batchGetUser(follows.map((follow) => follow.follower));
@@ -47,7 +47,7 @@ export class FollowService extends Service{
       selectedUser: UserDto
     ): Promise<boolean> {
 
-      this.authenticate(token);
+      await this.authenticate(token);
 
       return this.followDao.getItem(user.alias, selectedUser.alias) === undefined;
     };
@@ -57,7 +57,7 @@ export class FollowService extends Service{
       user: UserDto
     ): Promise<number> {
 
-      this.authenticate(token);
+      await this.authenticate(token);
 
       return (await this.followDao.getFollowees(user.alias)).length
     };
@@ -67,7 +67,7 @@ export class FollowService extends Service{
       user: UserDto
     ): Promise<number> {
 
-      this.authenticate(token);
+      await this.authenticate(token);
 
       return (await this.followDao.getFollowers(user.alias)).length
     };
