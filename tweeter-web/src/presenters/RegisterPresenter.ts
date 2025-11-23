@@ -111,7 +111,7 @@ export class RegisterPresenter extends AuthenticationPresenter<RegisterView> {
               "base64"
             );
     
-            this.view.setImageBytes(bytes);
+            this.imageBytes = bytes;
           };
           reader.readAsDataURL(file);
     

@@ -1,11 +1,8 @@
 import {
   BatchGetCommand,
-  DeleteCommand,
   DynamoDBDocumentClient,
   GetCommand,
   PutCommand,
-  QueryCommand,
-  UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { User } from "tweeter-shared";
@@ -18,6 +15,7 @@ export class DynamoUserDao implements UserDaoInterface {
     readonly firstNameAttr = "first_name";
     readonly lastNameAttr = "last_name";
     readonly passwordAttr = "password";
+    readonly ulrAttr = "ulr";
 
     private readonly client = DynamoDBDocumentClient.from(new DynamoDBClient());
 
@@ -37,14 +35,10 @@ export class DynamoUserDao implements UserDaoInterface {
                     output.Item[this.firstNameAttr], 
                     output.Item[this.lastNameAttr],
                     output.Item[this.handleAttr], 
-                    this.getImageUrl(output.Item[this.handleAttr])), 
+                    output.Item[this.ulrAttr]), 
                     output.Item![this.passwordAttr]];
                 return tuple;
             }
-    }
-
-    private getImageUrl(handle: string): string {
-        return `${handle}/img`
     }
 
     async addUser(user: User, password: string) {
@@ -55,6 +49,7 @@ export class DynamoUserDao implements UserDaoInterface {
             [this.firstNameAttr]: user.firstName,
             [this.lastNameAttr]: user.lastName,
             [this.passwordAttr]: password,
+            [this.ulrAttr]: user.imageUrl
           },
         };
         const result = await this.client.send(new PutCommand(params));
@@ -86,7 +81,7 @@ export class DynamoUserDao implements UserDaoInterface {
               item[this.firstNameAttr],
               item[this.lastNameAttr],
               item[this.handleAttr],
-              this.getImageUrl(item[this.handleAttr])
+              item[this.ulrAttr]
             )
         );
       }

@@ -3,7 +3,10 @@ import { AuthtokenDaoInterface } from "../daos/interfaces/AuthtokenDaoInterface"
 import { DaoFactoryInterface } from "../factory/DaoFactoryInterface";
 import { UserDaoInterface } from "../daos/interfaces/UserDaoInteface";
 
+const AUTHTOKEN_DURATION = process.env.AUTHTOKEN_DURATION;
+
 export class Service {
+    
 
     protected authtokenDao: AuthtokenDaoInterface;
     protected userDao: UserDaoInterface;
@@ -16,7 +19,12 @@ export class Service {
         const item = await this.authtokenDao.getItem(token);
 
         if (item === undefined) {
-          throw new Error("Bad Request : Invalid Authtoken");  
+          throw new Error("[Bad Request] : Invalid Authtoken");  
+        }
+
+        if (Date.now() - item.lastUsed > (AUTHTOKEN_DURATION == undefined ? parseInt(AUTHTOKEN_DURATION!) : 30 * 60 * 1000)) {
+            await this.authtokenDao.deleteToken(token);
+            throw new Error("[Bad Request] : Expired Authtoken"); 
         }
 
         await this.authtokenDao.updateLastUsed(token, Date.now());
@@ -24,7 +32,7 @@ export class Service {
         const result = await this.userDao.getItem(item.userHandle);
         
         if (!result) {
-            throw new Error("Bad Request : Invalid Authtoken");
+            throw new Error("[Bad Request] : Invalid Authtoken");
         }
 
         const [user, _] = result!

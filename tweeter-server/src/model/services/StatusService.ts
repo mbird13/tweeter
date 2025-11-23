@@ -52,6 +52,10 @@ export class StatusService extends Service {
         await this.storyDao.addStoryItem(Status.fromDto(newStatus)!);
 
         const followers = (await this.followDao.getFollowers(currentUser.alias)).map((follow) => follow.follower);
-        await followers.forEach(async (follower) => await this.feedDao.addFeedItem(follower, Status.fromDto(newStatus)!));
+        await Promise.all(
+          followers.map(follower =>
+            this.feedDao.addFeedItem(follower, Status.fromDto(newStatus)!)
+          )
+        );
       };
 }

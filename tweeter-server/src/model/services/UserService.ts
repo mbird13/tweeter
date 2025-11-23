@@ -1,8 +1,18 @@
 import { UserDto, AuthTokenDto, User, AuthToken } from "tweeter-shared";
 import { Service } from "./Service";
 import bcrypt from "bcryptjs";
+import { ImageDaoInterface } from "../daos/interfaces/ImageDaoInterface";
+import { DaoFactoryInterface } from "../factory/DaoFactoryInterface";
 
 export class UserService extends Service {
+
+  private imageDao: ImageDaoInterface;
+
+  public constructor(daoFactory: DaoFactoryInterface) {
+    super(daoFactory);
+    this.imageDao = daoFactory.createImageDao();
+  }
+
   public async getUser (
     token: string,
     alias: string
@@ -23,9 +33,9 @@ export class UserService extends Service {
     imageFileExtension: string
     ): Promise<[UserDto, AuthTokenDto]> {
 
-    //TODO: add image to s3 HERE
+    const url = await this.imageDao.putImage(`${alias}.${imageFileExtension}`, imageStringBase64);
 
-    const user = new User(firstName, lastName, alias, `${alias}/img`);
+    const user = new User(firstName, lastName, alias, url);
 
     const salt = bcrypt.genSaltSync(10);
     const hash = bcrypt.hashSync(password, salt);
@@ -33,15 +43,15 @@ export class UserService extends Service {
     await this.userDao.addUser(user, hash);
 
     if (user === null) {
-      throw new Error("Invalid registration");
+      throw new Error("[Bad Request] Invalid registration");
     }
 
-    return this.generateAuthAndLogin(user);
+    return await this.generateAuthAndLogin(user);
   };
 
-  private generateAuthAndLogin(user: User) {
+  private async generateAuthAndLogin(user: User) {
     const auth = AuthToken.Generate();
-    this.authtokenDao.addToken(auth.token, user.alias, auth.timestamp);
+    await this.authtokenDao.addToken(auth.token, user.alias, auth.timestamp);
     return [user.dto, auth.dto] as [UserDto, AuthTokenDto];
   }
 
@@ -51,14 +61,14 @@ export class UserService extends Service {
   ): Promise<[UserDto, AuthTokenDto]> {
 
     const result = await this.userDao.getItem(alias);
-    if (!result) { throw new Error("Bad Request: invalid username")}
+    if (!result) { throw new Error("[Bad Request]: invalid username")}
 
     const [user, hash] = result!;
     const valid: boolean = bcrypt.compareSync(password, hash);
 
-    if (!valid) {throw new Error("Bad Request: invalid password")}
+    if (!valid) {throw new Error("[Bad Request]: invalid password")}
 
-    return this.generateAuthAndLogin(user);
+    return await this.generateAuthAndLogin(user);
   };
 
   public async logout(token: string): Promise<void> {

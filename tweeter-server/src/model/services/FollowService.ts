@@ -23,7 +23,7 @@ export class FollowService extends Service{
 
       const [follows, hasMore] = await this.followDao.getPageOfFollowees(userAlias, pageSize, lastItem == null ? undefined: lastItem!.alias);
       const users = await this.userDao.batchGetUser(follows.map((follow) => follow.followee));
-      return [users, hasMore];
+      return [users.map((user) => user.dto), hasMore];
 
     };
 
@@ -38,7 +38,7 @@ export class FollowService extends Service{
 
       const [follows, hasMore] = await this.followDao.getPageOfFollowers(userAlias, pageSize, lastItem == null ? undefined: lastItem!.alias);
       const users = await this.userDao.batchGetUser(follows.map((follow) => follow.follower));
-      return [users, hasMore];    
+      return [users.map((user) => user.dto), hasMore];    
     };  
 
   public async getIsFollowerStatus (
@@ -49,7 +49,7 @@ export class FollowService extends Service{
 
       await this.authenticate(token);
 
-      return this.followDao.getItem(user.alias, selectedUser.alias) === undefined;
+      return (await this.followDao.getItem(user.alias, selectedUser.alias)) != undefined;
     };
 
   public async getFolloweeCount (

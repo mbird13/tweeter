@@ -5,7 +5,7 @@ import {
   QueryCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { Status } from "tweeter-shared";
+import { Status, User } from "tweeter-shared";
 
 export abstract class DynamoStatusDao {
     abstract tableName: string;
@@ -33,12 +33,15 @@ export abstract class DynamoStatusDao {
             const items: Status[] = [];
             const data = await this.client.send(new QueryCommand(params));
             const hasMorePages = data.LastEvaluatedKey !== undefined;
-            data.Items?.forEach((item) =>
-            items.push(new Status(
-                item[this.contentAttr],
-                JSON.parse(item[this.authorUserAttr]),
-                item[this.timestampAttr]
-            ))
+            data.Items?.forEach((item) => {
+                const user = JSON.parse(item[this.authorUserAttr])
+                items.push(new Status(
+                    item[this.contentAttr],
+                    new User(user._firstName, user._lastName, user._alias, user._imageUrl),
+                    item[this.timestampAttr]
+                
+                ))
+            }
             );
 
         return [items, hasMorePages];
