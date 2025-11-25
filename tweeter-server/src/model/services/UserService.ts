@@ -33,6 +33,12 @@ export class UserService extends Service {
     imageFileExtension: string
     ): Promise<[UserDto, AuthTokenDto]> {
 
+      const existingUser = await this.userDao.getItem(alias);
+
+      if (existingUser) {
+        throw new Error("[Bad Request] Alias already taken");
+      }
+
     const url = await this.imageDao.putImage(`${alias}.${imageFileExtension}`, imageStringBase64);
 
     const user = new User(firstName, lastName, alias, url);

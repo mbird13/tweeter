@@ -26,12 +26,13 @@ export class DynamoFollowDao implements FollowDaoInterface {
             },
             TableName: this.tableName,
             Limit: pageSize,
+            ScanIndexForward: true,
             ExclusiveStartKey:
                 lastFolloweeHandle === undefined
                 ? undefined
                 : {
-                    [this.followeeHandleAttr]: lastFolloweeHandle,
                     [this.followerHandleAttr]: followerHandle,
+                    [this.followeeHandleAttr]: lastFolloweeHandle,
                     },
             };
 
@@ -55,12 +56,13 @@ export class DynamoFollowDao implements FollowDaoInterface {
             TableName: this.tableName,
             IndexName: "follows_index",
             Limit: pageSize,
+            ScanIndexForward: true,
             ExclusiveStartKey:
                 lastFollowerHandle === undefined
                 ? undefined
                 : {
-                    [this.followerHandleAttr]: lastFollowerHandle,
                     [this.followeeHandleAttr]: followeeHandle,
+                    [this.followerHandleAttr]: lastFollowerHandle,
                     },
             };
 

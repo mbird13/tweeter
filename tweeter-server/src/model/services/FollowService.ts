@@ -22,8 +22,19 @@ export class FollowService extends Service{
       await this.authenticate(token);
 
       const [follows, hasMore] = await this.followDao.getPageOfFollowees(userAlias, pageSize, lastItem == null ? undefined: lastItem!.alias);
-      const users = await this.userDao.batchGetUser(follows.map((follow) => follow.followee));
-      return [users.map((user) => user.dto), hasMore];
+      // Original order based on following table
+      const orderedAliases = follows.map(f => f.followee);
+
+      // Batch fetch users (unordered)
+      const users = await this.userDao.batchGetUser(orderedAliases);
+
+      // Reorder based on original follow order
+      const userMap = new Map(users.map(u => [u.alias, u]));
+      const orderedUsers = orderedAliases.map(alias => userMap.get(alias)!);
+
+      return [orderedUsers.map(user => user.dto), hasMore];
+      // const users = await this.userDao.batchGetUser(follows.map((follow) => follow.followee));
+      // return [users.map((user) => user.dto), hasMore];
 
     };
 
@@ -37,8 +48,18 @@ export class FollowService extends Service{
       await this.authenticate(token);
 
       const [follows, hasMore] = await this.followDao.getPageOfFollowers(userAlias, pageSize, lastItem == null ? undefined: lastItem!.alias);
-      const users = await this.userDao.batchGetUser(follows.map((follow) => follow.follower));
-      return [users.map((user) => user.dto), hasMore];    
+      // Original order based on following table
+      const orderedAliases = follows.map(f => f.follower);
+
+      // Batch fetch users (unordered)
+      const users = await this.userDao.batchGetUser(orderedAliases);
+
+      // Reorder based on original follow order
+      const userMap = new Map(users.map(u => [u.alias, u]));
+      const orderedUsers = orderedAliases.map(alias => userMap.get(alias)!);
+      return [orderedUsers.map(user => user.dto), hasMore];
+      // const users = await this.userDao.batchGetUser(follows.map((follow) => follow.follower));
+      // return [users.map((user) => user.dto), hasMore];    
     };  
 
   public async getIsFollowerStatus (

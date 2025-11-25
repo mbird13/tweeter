@@ -22,7 +22,10 @@ export class Service {
           throw new Error("[Bad Request] : Invalid Authtoken");  
         }
 
-        if (Date.now() - item.lastUsed > (AUTHTOKEN_DURATION == undefined ? parseInt(AUTHTOKEN_DURATION!) : 30 * 60 * 1000)) {
+        const duration = AUTHTOKEN_DURATION !== undefined
+                        ? parseInt(AUTHTOKEN_DURATION)
+                        : 30 * 60 * 1000;
+        if (Date.now() - item.lastUsed > duration) {
             await this.authtokenDao.deleteToken(token);
             throw new Error("[Bad Request] : Expired Authtoken"); 
         }

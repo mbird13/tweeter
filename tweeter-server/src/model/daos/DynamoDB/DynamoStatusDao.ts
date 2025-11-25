@@ -27,7 +27,8 @@ export abstract class DynamoStatusDao {
             ExclusiveStartKey:
                 lastStatus === undefined
                 ? undefined
-                : {[this.handleAttr]: lastStatus.user.alias, [this.timestampAttr]: lastStatus.timestamp},
+                : {[this.handleAttr]: handle, [this.timestampAttr]: lastStatus.timestamp},
+            ScanIndexForward: false
             };
 
             const items: Status[] = [];
