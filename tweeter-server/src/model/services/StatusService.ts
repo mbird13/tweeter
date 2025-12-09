@@ -1,15 +1,18 @@
-import { Status, StatusDto } from "tweeter-shared";
+import { Status, StatusDto, UserDto } from "tweeter-shared";
 import { Service } from "./Service";
 import { StoryDaoInterface } from "../daos/interfaces/StoryDaoInterface";
 import { FeedDaoInterface } from "../daos/interfaces/FeedDaoInterface";
 import { DaoFactoryInterface } from "../factory/DaoFactoryInterface";
 import { FollowDaoInterface } from "../daos/interfaces/FollowDaoInterface";
+import { PostStatusQueue } from "../daos/SQS/PostStatusQueue";
 
 export class StatusService extends Service {
 
   storyDao: StoryDaoInterface;
   feedDao: FeedDaoInterface;
   followDao: FollowDaoInterface;
+
+  postStatusQueue: PostStatusQueue = new PostStatusQueue();
   
     constructor(daoFactory: DaoFactoryInterface) {
       super(daoFactory);
@@ -51,11 +54,18 @@ export class StatusService extends Service {
 
         await this.storyDao.addStoryItem(Status.fromDto(newStatus)!);
 
-        const followers = (await this.followDao.getFollowers(currentUser.alias)).map((follow) => follow.follower);
-        await Promise.all(
-          followers.map(follower =>
-            this.feedDao.addFeedItem(follower, Status.fromDto(newStatus)!)
-          )
-        );
+        await this.postStatusQueue.addStatusToQueue(token, currentUser, Status.fromDto(newStatus)!)
+
+        // const followers = (await this.followDao.getFollowers(currentUser.alias)).map((follow) => follow.follower);
+        // await Promise.all(
+        //   followers.map(follower =>
+        //     this.feedDao.addFeedItem(follower, Status.fromDto(newStatus)!)
+        //   )
+        // );
       };
+
+    public async batchAddFeed(userList: UserDto[], status: Status) {
+      await this.feedDao.batchAddFeedItems(userList, status);
+    }
 }
+
