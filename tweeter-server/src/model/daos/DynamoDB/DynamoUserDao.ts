@@ -3,6 +3,7 @@ import {
   DynamoDBDocumentClient,
   GetCommand,
   PutCommand,
+  UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { User } from "tweeter-shared";
@@ -16,6 +17,8 @@ export class DynamoUserDao implements UserDaoInterface {
     readonly lastNameAttr = "last_name";
     readonly passwordAttr = "password";
     readonly ulrAttr = "ulr";
+    private readonly followeeCountAttribute = "followee_count";
+    private readonly followerCountAttribute = "follower_count";
 
     private readonly client = DynamoDBDocumentClient.from(new DynamoDBClient());
 
@@ -89,6 +92,39 @@ export class DynamoUserDao implements UserDaoInterface {
 
     return [];
   }
+
+  async updateFollowerCount(alias: string, follower_count: number) {
+          const params = {
+                TableName: this.tableName,
+                Key: {[this.handleAttr]: alias},
+                ExpressionAttributeValues: { ":num": follower_count },
+                UpdateExpression:
+                  "SET " +
+                  this.followerCountAttribute + " = :num"
+              };
+              await this.client.send(new UpdateCommand(params));
+      }
+
+
+  async getFollowerCount(handle: string) {
+            const params = {
+                TableName: this.tableName,
+                Key: {[this.handleAttr]: handle},
+            };
+            const output = await this.client.send(new GetCommand(params));
+            if (
+                output.Item === undefined
+                ) {
+                return undefined;
+            } else {
+              if (output.Item[this.followerCountAttribute] === undefined) {
+                throw new Error("not follower count");
+              }
+              else {
+                return output.Item[this.followerCountAttribute];
+              }
+            }
+    }
 
     
 

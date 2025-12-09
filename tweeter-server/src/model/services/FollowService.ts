@@ -90,7 +90,11 @@ export class FollowService extends Service{
 
       await this.authenticate(token);
 
-      return (await this.followDao.getFollowers(user.alias)).length
+      try {
+        return (await this.userDao.getFollowerCount(user.alias))
+      } catch {
+        return (await this.followDao.getFollowers(user.alias)).length
+      }
     };
 
   public async follow(
@@ -100,13 +104,15 @@ export class FollowService extends Service{
 
       const currentUser = await this.authenticate(token);
       //currentUser = follower, userToFollow = followee
-      this.followDao.createFollow(new Follow(currentUser.alias, userToFollow.alias));
+      let oldFollowerCount = await this.getFollowerCount(token, userToFollow);
+      await this.followDao.createFollow(new Follow(currentUser.alias, userToFollow.alias));
+      await this.userDao.updateFollowerCount(userToFollow.alias, oldFollowerCount+1);
 
       //get new followee/r counts
-      const followerCount = await this.getFollowerCount(token, userToFollow);
+      //const followerCount = await this.getFollowerCount(token, userToFollow);
       const followeeCount = await this.getFolloweeCount(token, userToFollow);
 
-      return [followerCount, followeeCount];
+      return [oldFollowerCount+1, followeeCount];
   };
 
   public async unfollow(
@@ -116,12 +122,14 @@ export class FollowService extends Service{
       const currentUser = await this.authenticate(token);
 
       //currentUser = follower, userToUnfollow = followee
+      let oldFollowerCount = await this.getFollowerCount(token, userToUnfollow);
       this.followDao.deleteFollow(currentUser.alias, userToUnfollow.alias)
+      await this.userDao.updateFollowerCount(userToUnfollow.alias, oldFollowerCount-1);
 
-      const followerCount = await this.getFollowerCount(token, userToUnfollow);
+      //const followerCount = await this.getFollowerCount(token, userToUnfollow);
       const followeeCount = await this.getFolloweeCount(token, userToUnfollow);
   
-      return [followerCount, followeeCount];
+      return [oldFollowerCount-1, followeeCount];
   };
 
     

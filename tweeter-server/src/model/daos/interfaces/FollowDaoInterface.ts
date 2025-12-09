@@ -9,5 +9,6 @@ export interface FollowDaoInterface {
     getItem(follower_handle: string, followee_handle:string): Promise<Follow | undefined>;
     getFollowees(followerHandle: string): Promise<Follow[]>;
     getFollowers(followeeHandle: string): Promise<Follow[]>;
+    batchCreateFollows(followeeAlias: string, followerAliasList: string[]): void;
 
 }

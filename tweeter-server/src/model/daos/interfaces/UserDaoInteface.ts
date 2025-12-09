@@ -4,5 +4,7 @@ export interface UserDaoInterface {
   getItem(userHandle: string): Promise<[User, string] | undefined>;
   batchGetUser(handles: string[]): Promise<User[]>;
   addUser(user: User, password: string): void;
+  getFollowerCount(handle: string): Promise<number>;
+  updateFollowerCount(alias: string, follower_count: number): void;
     
 }
