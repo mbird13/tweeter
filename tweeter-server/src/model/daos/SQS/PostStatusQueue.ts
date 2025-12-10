@@ -9,7 +9,7 @@ export class PostStatusQueue {
     public async addStatusToQueue(token: string, user: User, status: Status): Promise<void> {
 
         const params = {
-            DelaySeconds: 10,
+            DelaySeconds: 0,
             MessageBody: JSON.stringify({ token: token, author: user, status: status }),
             QueueUrl: this.sqs_url,
         };

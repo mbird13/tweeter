@@ -9,7 +9,7 @@ export class UpdateFeedQueue {
     public async addFollowersToQueue(status: Status, followers: UserDto[]): Promise<void> {
 
         const params = {
-            DelaySeconds: 10,
+            DelaySeconds: 0,
             MessageBody: JSON.stringify({ status: status, followers: followers }),
             QueueUrl: this.sqs_url,
         };
